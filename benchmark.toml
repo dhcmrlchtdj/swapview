@@ -187,6 +187,9 @@ cmd = ["rbx", "swapview.rb"]
 [item.Scala]
 cmd = ["scala", "SwapView"]
 
+[item.Swift]
+cmd = ["./swapview"]
+
 [item.Tcl]
 cmd = ["./swapview.tcl"]
 
