@@ -22,22 +22,9 @@ func filesize(_ size: Int) -> String {
     }
 }
 
-func readDir(_ path: String) -> [String]? {
-    do {
-        let files = try FileManager.default.contentsOfDirectory(atPath: path)
-        return files
-    } catch {
-        return nil
-    }
-}
-
 func readFile(_ path: String) -> [String]? {
-    do {
-        let content = try String(contentsOfFile: path, encoding: .utf8)
-        return content.components(separatedBy: "\n")
-    } catch {
-        return nil
-    }
+    let content = try? String(contentsOfFile: path, encoding: .utf8)
+    return content?.components(separatedBy: "\n")
 }
 
 func getCommFor(_ pid: String) -> String {
@@ -71,7 +58,8 @@ func getSwapFor(_ pid: String) -> Swap {
 }
 
 func getSwaps() -> [Swap] {
-    if let files = readDir("/proc") {
+    let manager = FileManager.default
+    if let files = manager.contentsOfDirectory(atPath: "/proc") {
         return files
             .filter { "0" ... "9" ~= $0 }
             .map(getSwapFor)
@@ -101,4 +89,3 @@ func main() {
     }
     print("Total: \(pad(filesize(total), 8))")
 }
-
