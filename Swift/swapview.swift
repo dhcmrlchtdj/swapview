@@ -1,35 +1,30 @@
 import Foundation
 
-typealias Swap = (pid: String, size: Int, cmd: String)
+typealias Swap = (pid: String, size: Int, command: String)
 
 func chopNull(_ s: String) -> String {
-    /* var ss = s.last == "\0" ? s.dropLast() : s */
-    /* return ss.map { $0 == "\0" ? " " : $0 } */
-    let c1 = s.characters
-    let c2 = c1.last == "\0" ? c1.dropLast() : c1
-    let c3 = c2.map { $0 == "\0" ? " " : $0 }
-    return String(c3)
+    let ss = s.last == "\0" ? s.dropLast() : s
+    return ss.map { $0 == "\0" ? " " : $0 }
 }
 
 func filesize(_ size: Int) -> String {
-    let units = ["KiB", "MiB", "GiB", "TiB"]
-    var left = Double(size)
-    var unit = -1
-    while left > 1100.0 && unit < 3 {
-        left /= 1024.0
-        unit += 1
-    }
-    if unit == -1 {
+    if size <= 1100 {
         return "\(size)B"
     } else {
+        let units = ["KiB", "MiB", "GiB", "TiB"]
+        var left = Double(size)
+        var unit = -1
+        while left > 1100 && unit < 3 {
+            left /= 1024
+            unit += 1
+        }
         return String(format: "%.1f%@", left, units[unit])
     }
 }
 
-func readDir(_ dir: String) -> [String]? {
-    let manager = FileManager.default
+func readDir(_ path: String) -> [String]? {
     do {
-        let files = try manager.contentsOfDirectory(atPath: dir)
+        let files = try FileManager.default.contentsOfDirectory(atPath: path)
         return files
     } catch {
         return nil
@@ -64,7 +59,8 @@ func getSwapFor(_ pid: String) -> Swap {
         let size = content
             .filter { $0.hasPrefix("Swap:") }
             .map { line in
-                let size = line.trimmingCharacters(in: CharacterSet(charactersIn: "Swap: kB"))
+                let trim = CharacterSet(charactersIn: "Swap: kB")
+                let size = line.trimmingCharacters(in: trim)
                 return Int(size) ?? 0
             }
             .reduce(0, +)
@@ -92,12 +88,16 @@ func main() {
         return ss[ss.index(ss.endIndex, offsetBy: -len) ..< ss.endIndex]
     }
 
-    print("\(pad("PID", 5)) \(pad("SWAP", 9)) COMMAND")
+    func printSwapWithFormat(_ pid: String, _ size: String, _ command: String) {
+        print("\(pad(pid, 5)) \(pad(size, 9)) \(command)")
+    }
+
+    printSwapWithFormat("PID", "SWAP", "COMMAND")
     let swaps = getSwaps()
     var total = 0
     for swap in swaps {
         total += swap.size
-        print("\(pad(swap.pid, 5)) \(pad(filesize(swap.size), 9)) \(swap.cmd)")
+        printSwapWithFormat(swap.pid, filesize(swap.size), swap.command)
     }
     print("Total: \(pad(filesize(total), 8))")
 }
