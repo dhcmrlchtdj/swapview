@@ -3,8 +3,8 @@ import Foundation
 typealias Swap = (pid: String, size: Int, command: String)
 
 func chopNull(_ s: String) -> String {
-    let ss = s.last == "\0" ? s.dropLast() : s
-    return ss.map { $0 == "\0" ? " " : $0 }
+    let ss = s.last == "\0" ? String(s.dropLast()) : s
+    return String(ss.map { $0 == "\0" ? " " : $0 })
 }
 
 func filesize(_ size: Int) -> String {
@@ -18,7 +18,7 @@ func filesize(_ size: Int) -> String {
             left /= 1024
             unit += 1
         }
-        return String(format: "%.1f%@", left, units[unit])
+        return String(format: "%.1f\(units[unit])", left)
     }
 }
 
@@ -59,7 +59,7 @@ func getSwapFor(_ pid: String) -> Swap {
 
 func getSwaps() -> [Swap] {
     let manager = FileManager.default
-    if let files = manager.contentsOfDirectory(atPath: "/proc") {
+    if let files = try? manager.contentsOfDirectory(atPath: "/proc") {
         return files
             .filter { "0" ... "9" ~= $0 }
             .map(getSwapFor)
