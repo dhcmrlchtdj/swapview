@@ -72,8 +72,12 @@ func getSwaps() -> [Swap] {
 
 func main() {
     func pad(_ s: String, _ len: Int) -> String {
-        let ss = String(repeating: " ", count: len) + s
-        return ss[ss.index(ss.endIndex, offsetBy: -len) ..< ss.endIndex]
+        if s.count > len {
+            return s
+        } else {
+            let padding = String(repeating: " ", count: len - s.count)
+            return padding + s
+        }
     }
 
     func printSwapWithFormat(_ pid: String, _ size: String, _ command: String) {
